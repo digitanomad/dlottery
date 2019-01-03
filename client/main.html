@@ -1,25 +1,29 @@
 <head>
-  <title>dlottery</title>
+  <title>Lottery</title>
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
-  {{> info}}
+  <center>
+    {{>lottery}}    
+  </center>
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="lottery">
+  <p>현재 {{getEntryCount}}명이 응모하셨습니다.</p>
+  <p>현재 모금액은 {{getFundsAmount}}Ether 입니다.</p>
+  <p>현재 응모한 주소 목록<br>
+  {{#each value in getEntryAddresses}}
+  {{value}}<br>
+  {{/each}}
+  </p>
+  <p>
+    계정 : <input type="text" id="account" name="account">
+    비밀번호 : <input type="password" id="password" name="password">
+    응모번호 : <input type="number" id="number" name="number" min="1" max="2">
+    <br>
+    <button type="button" id="entry">응모하기</button>
+    <button type="button" id="draw">추첨하기</button>
+  </p>
+
 </template>
 
-<template name="info">
-  <h2>Learn Meteor!</h2>
-  <ul>
-    <li><a href="https://www.meteor.com/try" target="_blank">Do the Tutorial</a></li>
-    <li><a href="http://guide.meteor.com" target="_blank">Follow the Guide</a></li>
-    <li><a href="https://docs.meteor.com" target="_blank">Read the Docs</a></li>
-    <li><a href="https://forums.meteor.com" target="_blank">Discussions</a></li>
-  </ul>
-</template>

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-contract LotteryContract {
+contract Lottery {
 
     struct EntryInfo {
         uint8 entryNumber;
@@ -12,21 +12,22 @@ contract LotteryContract {
     mapping (address => EntryInfo) entryInfos;
     address payable[] entryAddresses;
     address payable[] winAddresses;
-    uint32 entryCount;
     
     address admin;
 
-
     constructor() public {
         admin = msg.sender;
-        entryCount = 0;
     }
 
-    function getEntryCount() public view returns(uint32) {
-        return entryCount;
+    function getEntryCount() public view returns(uint) {
+        return entryAddresses.length;
     }
 
-    function entry(uint8 entryNumber) public {
+    function getEntryAddresses() public view returns(address payable[] memory) {
+        return entryAddresses;
+    }
+
+    function entry(uint8 entryNumber) public payable {
         EntryInfo storage entryInfo = entryInfos[msg.sender];
         if (entryInfo.entried) {
             return;
@@ -35,15 +36,14 @@ contract LotteryContract {
         entryInfo.entried = true;
         entryInfo.entryNumber = entryNumber;
         entryAddresses.push(msg.sender);
-        entryCount++;
     }
 
-    function draw() payable public {
+    function draw() public {
         if (admin != msg.sender) {
             return;
         }
 
-        uint winNumber = (uint(blockhash(block.number - 1)) % 10) + 1;
+        uint winNumber = (uint(blockhash(block.number - 1)) % 2) + 1;
 
         for (uint i = 0; i < entryAddresses.length; i++) {
             EntryInfo memory entryInfo = entryInfos[entryAddresses[i]];
@@ -52,14 +52,18 @@ contract LotteryContract {
             }
         }
 
-
         if (winAddresses.length > 0) {
-            uint256 dividend = entryCount / winAddresses.length;
+            uint256 dividend = entryAddresses.length / winAddresses.length;
             for (uint i = 0; i < winAddresses.length; i++) {
                 winAddresses[i].transfer(dividend);
             }
         }
 
-        // selfdestruct(contractOwner);
+        for (uint i = 0; i < entryAddresses.length; i++) {
+            delete entryInfos[entryAddresses[i]];
+        }
+        
+        delete entryAddresses;
+        delete winAddresses;
     }
 }
