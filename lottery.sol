@@ -39,23 +39,21 @@ contract Lottery {
     }
 
     function draw() public {
-        if (admin != msg.sender) {
-            return;
-        }
+        require(entryAddresses.length > 0, "To draw the lottery, you need to entry");
+        require(admin == msg.sender, "This function can be excuted by admin");
 
         uint winNumber = (uint(blockhash(block.number - 1)) % 2) + 1;
 
         for (uint i = 0; i < entryAddresses.length; i++) {
-            EntryInfo memory entryInfo = entryInfos[entryAddresses[i]];
+            EntryInfo storage entryInfo = entryInfos[entryAddresses[i]];
             if (entryInfo.entried && entryInfo.entryNumber == winNumber) {
                 winAddresses.push(entryAddresses[i]);
             }
         }
 
         if (winAddresses.length > 0) {
-            uint256 dividend = entryAddresses.length / winAddresses.length;
             for (uint i = 0; i < winAddresses.length; i++) {
-                winAddresses[i].transfer(dividend);
+                winAddresses[i].transfer((address(this).balance) / winAddresses.length);
             }
         }
 
@@ -66,4 +64,10 @@ contract Lottery {
         delete entryAddresses;
         delete winAddresses;
     }
+
+    function getEntryInfo(address account) public view returns(uint8, bool) {
+        EntryInfo memory entryInfo = entryInfos[account];
+        return (entryInfo.entryNumber, entryInfo.entried);
+    }
+
 }
